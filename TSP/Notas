@@ -1,0 +1,150 @@
+3 cidades
+-->  0-1-2
+
+4 cidades
+-->  0-2-1-3
+
+5 cidades
+-->  0-3-1-2-4
+
+6 cidades
+-->  0-3-1-2-5-4
+
+7 cidades
+-->  0-2-5-3-1-6-4
+//////////////////////////
+T ( 1, {2,3,4} ) = minimum of
+
+= { (1,2) + T (2,  {3,4} )     4+6=10
+
+= { (1,3)  + T (3, {2,4} )     1+3=4
+
+= { (1,4) + T (4, {2,3} )     3+3=6
+
+Here minimum of above 3 paths is answer but we know only values of (1,2) , (1,3) , (1,4) remaining thing which is T ( 2, {3,4} ) …are new problems now. First we have to solve those and substitute here.
+
+T (2, {3,4} )   = minimum of
+
+=  { (2,3) + T (3, {4} )     2+5=7
+
+= { (2,4) + T {4, {3} )     1+5=6
+
+T (3, {2,4} )   = minimum of
+
+=  { (3,2) + T (2, {4} )     2+1=3
+
+= { (3,4) + T {4, {2} )     5+1=6
+
+T (4, {2,3} )   = minimum of
+
+=  { (4,2) + T (2, {3} )     1+2=3
+
+= { (4,3) + T {3, {2} )     5+2=7
+
+T ( 3, {4} ) =  (3,4) + T (4, {} )     5+0=5
+
+T ( 4, {3} ) =  (4,3) + T (3, {} )     5+0=5
+
+T ( 2, {4} ) =  (2,4) + T (4, {} )     1+0=1
+
+T ( 4, {2} ) =  (4,2) + T (2, {} )     1+0 = 1
+
+T ( 2, {3} ) =  (2,3) + T (3, {} )     2+0 = 2
+
+T ( 3, {2} ) =  (3,2) + T (2, {} )     2+0=2
+
+Here T ( 4, {} ) is reaching base condition in recursion, which returns 0 (zero ) distance.
+
+This is where we can find final answer,
+
+T ( 1, {2,3,4} ) = minimum of
+
+= { (1,2) + T (2,  {3,4} )     4+6=10 in this path we have to add +1 because this path ends with 3. From there we have to reach 1 so 3->1 distance 1 will be added total distance is 10+1=11
+
+= { (1,3)  + T (3, {2,4} )     1+3=4 in this path we have to add +3 because this path ends with 3. From there we have to reach 1 so 4->1 distance 3 will be added total distance is 4+3=7
+
+= { (1,4) + T (4, {2,3} )     3+3=6 in this path we have to add +1 because this path ends with 3. From there we have to reach 1 so 3->1 distance 1 will be added total distance is 6+1=7
+
+
+
+
+
+
+int tsp_v3(int initial_node, int amount_of_cities, int mask[amount_of_cities]){
+  //void tsp_v3(int initial_node, int amount_of_cities, int mask[amount_of_cities]){
+  int n_opcoes=0;
+  int min_temp=999999; //numero demasiado grande
+
+
+  //ocupar na mascara o node usado
+  mask[initial_node]=1;
+  
+  //imprimir mascara
+  printf("mask-->");  
+  for(int i=0; i<amount_of_cities; i++){
+    
+    printf("%3i ", mask[i]);  
+      if(mask[i]==0){
+        n_opcoes++;
+        
+      }
+  }
+
+  //determinar a quantidade de cidades que falta comparar e verificar
+  int cidades_em_falta[n_opcoes];
+  int counter=0;
+  for(int i=0; i<amount_of_cities; i++){
+    if(mask[i]==0){
+      cidades_em_falta[counter]=i;
+      counter++;
+    }
+  }
+  printf("\nn_opcoes:  %i\n", n_opcoes);
+  printf("\ncidades em falta:  ");
+  for(int i=0; i<n_opcoes; i++){
+    printf("%i ", cidades_em_falta[i]);
+  }
+  printf("\n");
+  
+  /*
+ 
+  T (0, {1,2,3})= minimum of
+
+  = { (0,1)  + T (1,  {2,3} )     -->matriz[0][1] + tsp_v3(1, {1,1,0,0})
+
+  = { (0,2)  + T (2,  {1,3} )     -->matriz[0][2] + tsp_v3(2, {1,0,1,0})
+
+  = { (0,3)  + T (3,  {1,2} )     -->matriz[0][3] + tsp_v3(3, {1,0,0,1});
+  */
+  if(n_opcoes==0){
+    min_temp=matriz[initial_node][0]; //0 pq supostamente comecamos desta cidade
+
+  }
+  else{
+    for(int i=0; i<n_opcoes; i++){  
+      //criar mascara nova
+      int mask_temp[amount_of_cities];
+      for(int j=0; j<amount_of_cities; j++){
+        mask_temp[j]=mask[j];
+      }
+      mask_temp[cidades_em_falta[i]]=1;
+      //
+
+
+      int valor= matriz[cidades_em_falta[i]][initial_node] + tsp_v3(cidades_em_falta[i], amount_of_cities, mask_temp);
+      if DEBUG{
+        printf("cidade em falta: %i\n", cidades_em_falta[i]);
+        printf("distancia a cidade original: %i\n", valor);
+      }
+      printf("valor: %i\n", valor);
+      
+      if(valor<min_temp){
+        min_temp=valor;
+        printf("trocou\n");
+      }
+    }
+  }
+  
+  return min_temp;
+
+}
